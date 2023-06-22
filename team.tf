@@ -8,10 +8,10 @@ resource "vault_namespace" "team" {
 }
 
 resource "vault_mount" "kv" {
-  namespace   = vault_namespace.team.path_fq
-  path        = local.environment
-  type        = "kv"
-  options     = {
+  namespace = vault_namespace.team.path_fq
+  path      = local.environment
+  type      = "kv"
+  options = {
     version = "2"
   }
 }
@@ -54,19 +54,19 @@ resource "aws_iam_user_policy" "vault" {
   user = aws_iam_user.vault.name
 
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Sid": "VisualEditor0",
-        "Effect": "Allow",
-        "Action": [
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
           "iam:GetRole",
           "ec2:DescribeInstances",
           "iam:GetInstanceProfile",
           "iam:ListRoles",
           "iam:GetUser"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       }
     ]
   })
@@ -78,7 +78,7 @@ resource "aws_iam_user" "vault" {
 }
 
 resource "aws_iam_access_key" "vault" {
-  user    = aws_iam_user.vault.name
+  user = aws_iam_user.vault.name
 }
 
 resource "aws_iam_role" "vault" {
@@ -116,13 +116,13 @@ resource "vault_aws_auth_backend_client" "iam" {
 }
 
 resource "vault_aws_auth_backend_role" "iam" {
-  backend                         = vault_auth_backend.iam.path
-  namespace                       = vault_namespace.team.path_fq
-  role                            = "iam-role"
-  auth_type                       = "iam"
-  bound_iam_principal_arns        = [aws_iam_role.vault.arn]
-  resolve_aws_unique_ids          = true
-  token_policies                  = [vault_policy.iam.name]
+  backend                  = vault_auth_backend.iam.path
+  namespace                = vault_namespace.team.path_fq
+  role                     = "iam-role"
+  auth_type                = "iam"
+  bound_iam_principal_arns = [aws_iam_role.vault.arn]
+  resolve_aws_unique_ids   = true
+  token_policies           = [vault_policy.iam.name]
 
   depends_on = [vault_aws_auth_backend_client.iam]
 }
@@ -138,13 +138,13 @@ resource "vault_aws_auth_backend_role" "iam" {
 resource "aws_instance" "example" {
   count = 2
 
-  ami                  = "ami-022e1a32d3f742bd8"
-  instance_type        = "t2.micro"
-  iam_instance_profile = aws_iam_instance_profile.vault.name
-  key_name             = "Dev-Bastion"
+  ami                         = "ami-022e1a32d3f742bd8"
+  instance_type               = "t2.micro"
+  iam_instance_profile        = aws_iam_instance_profile.vault.name
+  key_name                    = "Dev-Bastion"
   associate_public_ip_address = true
-  subnet_id = "subnet-1441f34d"
-  vpc_security_group_ids = ["sg-09d16d6d"]
+  subnet_id                   = "subnet-1441f34d"
+  vpc_security_group_ids      = ["sg-09d16d6d"]
 
   tags = {
     Name = "jeff-test"
