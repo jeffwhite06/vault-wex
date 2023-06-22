@@ -131,7 +131,7 @@ resource "vault_aws_auth_backend_role" "iam" {
 # resource "vault_aws_auth_backend_config_identity" "iam" {
 #   backend      = vault_auth_backend.iam.path
 #   namespace    = vault_namespace.team.path_fq
-#   iam_alias    = "full_arn"
+#   iam_alias    = "unique_id"
 #   iam_metadata = ["account_id","auth_type","canonical_arn","client_arn","client_user_id","inferred_aws_region","inferred_entity_id","inferred_entity_type"]
 # }
 
