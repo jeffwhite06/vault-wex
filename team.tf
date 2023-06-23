@@ -156,7 +156,7 @@ resource "vault_identity_entity" "iam" {
   namespace = vault_namespace.team.path_fq
 
   metadata = {
-    environment = "prod"
+    environment = local.environment
   }
 }
 
