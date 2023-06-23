@@ -7,6 +7,54 @@ resource "vault_namespace" "team" {
   path      = var.team
 }
 
+resource "vault_mount" "team_kv" {
+  path      = "secret"
+  namespace = vault_namespace.team.path_fq
+  type      = "kv"
+  options = {
+    version = "2"
+  }
+}
+
+resource "vault_kv_secret_backend_v2" "team_kv" {
+  mount     = vault_mount.team_kv.path
+  namespace = vault_namespace.team.path_fq
+}
+
+resource "vault_kv_secret_v2" "team" {
+  mount     = vault_mount.team_kv.path
+  namespace = vault_namespace.team.path_fq
+  name      = "example"
+
+  data_json = jsonencode({
+    username = "username",
+    password = "password"
+  })
+}
+
+resource "vault_policy" "team" {
+  name      = "team"
+  namespace = vault_namespace.team.path_fq
+
+  policy = <<EOT
+path "secret/*" {
+  capabilities = ["read","list"]
+}
+
+path "prod/*" {
+  capabilities = ["read","list"]
+}
+EOT
+}
+
+resource "vault_identity_group" "team" {
+  name             = "github"
+  namespace        = vault_namespace.team.path_fq
+  type             = "internal"
+  policies         = ["default", vault_policy.team.name]
+  member_group_ids = [vault_identity_group.admin.id]
+}
+
 resource "vault_mount" "kv" {
   namespace = vault_namespace.team.path_fq
   path      = local.environment
