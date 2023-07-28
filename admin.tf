@@ -6,6 +6,59 @@ resource "vault_github_auth_backend" "github" {
   organization = var.github_org
 }
 
+resource "aws_iam_user" "vault" {
+  name = "aws-vault-user-admin"
+  path = "/"
+}
+
+resource "aws_iam_user_policy" "vault" {
+  name = "aws-vault-user-admin-policy"
+  user = aws_iam_user.vault.name
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
+          "iam:GetRole",
+          "ec2:DescribeInstances",
+          "iam:GetInstanceProfile",
+          "iam:ListRoles",
+          "iam:GetUser"
+        ],
+        "Resource" : "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_access_key" "vault" {
+  user = aws_iam_user.vault.name
+}
+
+resource "vault_auth_backend" "iam" {
+  type = "aws"
+}
+
+resource "vault_aws_auth_backend_client" "iam" {
+  backend    = vault_auth_backend.iam.path
+  access_key = aws_iam_access_key.vault.id
+  secret_key = aws_iam_access_key.vault.secret
+}
+
+resource "vault_aws_auth_backend_role" "app" {
+  backend                  = vault_auth_backend.iam.path
+  role                     = "admin"
+  auth_type                = "iam"
+  bound_iam_principal_arns = [<devopsuser>]
+  resolve_aws_unique_ids   = true
+  token_policies           = ["default"]
+
+  depends_on = [vault_aws_auth_backend_client.iam]
+}
+
 resource "vault_mount" "admin_kv" {
   path = "secret"
   type = "kv"
