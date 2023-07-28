@@ -27,21 +27,31 @@ resource "vault_kv_secret_v2" "fabric" {
   })
 }
 
-resource "vault_policy" "fabric" {
-  name      = "fabric"
-  namespace = vault_namespace.fabric.path_fq
+module "fabric_admins" {
+  source = "./modules/fabric"
 
-  policy = <<EOT
-path "secret/*" {
-  capabilities = ["read","list"]
-}
-EOT
+  fabric      = var.fabric
+  fabric_path = vault_namespace.fabric.path_fq
+  team        = var.admin_team
+  team_id     = module.admin_admins.admin_group_id
+  policy      = file("./vault-policies/fabric/admin.hcl")
 }
 
-resource "vault_identity_group" "fabric" {
-  name             = "github"
-  namespace        = vault_namespace.fabric.path_fq
-  type             = "internal"
-  policies         = ["default", vault_policy.fabric.name]
-  member_group_ids = [vault_identity_group.admin.id]
+module "fabric_engineering" {
+  source = "./modules/fabric"
+
+  fabric      = var.fabric
+  fabric_path = vault_namespace.fabric.path_fq
+  team        = var.team
+  team_id     = module.admin_engineering.admin_group_id
+}
+
+module "fabric_security" {
+  source = "./modules/fabric"
+
+  fabric      = var.fabric
+  fabric_path = vault_namespace.fabric.path_fq
+  team        = var.security_team
+  team_id     = module.admin_security.admin_group_id
+  policy      = file("./vault-policies/fabric/security.hcl")
 }

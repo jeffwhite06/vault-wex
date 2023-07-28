@@ -6,23 +6,6 @@ resource "vault_github_auth_backend" "github" {
   organization = var.github_org
 }
 
-resource "vault_github_team" "admin" {
-  backend = vault_github_auth_backend.github.id
-  team    = var.team
-}
-
-resource "vault_identity_group" "admin" {
-  name     = "github"
-  type     = "external"
-  policies = [vault_policy.admin.name]
-}
-
-resource "vault_identity_group_alias" "admin" {
-  name           = var.team
-  mount_accessor = vault_github_auth_backend.github.accessor
-  canonical_id   = vault_identity_group.admin.id
-}
-
 resource "vault_mount" "admin_kv" {
   path = "secret"
   type = "kv"
@@ -45,12 +28,28 @@ resource "vault_kv_secret_v2" "admin" {
   })
 }
 
-resource "vault_policy" "admin" {
-  name = "admin"
+module "admin_admins" {
+  source = "./modules/admin"
 
-  policy = <<EOT
-path "secret/*" {
-  capabilities = ["read","list"]
+  team                 = var.admin_team
+  github_auth_id       = vault_github_auth_backend.github.id
+  github_auth_accessor = vault_github_auth_backend.github.accessor
+  policy               = file("./vault-policies/admin/admin.hcl")
 }
-EOT
+
+module "admin_engineering" {
+  source = "./modules/admin"
+
+  team                 = var.team
+  github_auth_id       = vault_github_auth_backend.github.id
+  github_auth_accessor = vault_github_auth_backend.github.accessor
+}
+
+module "admin_security" {
+  source = "./modules/admin"
+
+  team                 = var.security_team
+  github_auth_id       = vault_github_auth_backend.github.id
+  github_auth_accessor = vault_github_auth_backend.github.accessor
+  policy               = file("./vault-policies/admin/security.hcl")
 }
