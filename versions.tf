@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0"
+    }
+  }
+}
+
 provider "vault" {
   address   = "https://vault-cluster-public-vault-7e14cb83.b404f542.z1.hashicorp.cloud:8200"
   namespace = local.admin_namespace

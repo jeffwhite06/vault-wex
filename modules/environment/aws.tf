@@ -56,18 +56,9 @@ resource "aws_iam_instance_profile" "vault" {
   role = aws_iam_role.vault[count.index].name
 }
 
-resource "aws_instance" "example" {
-  count = length(var.iam)
+module "instances" {
+  source = "../instance"
 
-  ami                         = "ami-022e1a32d3f742bd8"
-  instance_type               = "t2.micro"
-  iam_instance_profile        = aws_iam_instance_profile.vault[count.index].name
-  key_name                    = "Dev-Bastion"
-  associate_public_ip_address = true
-  subnet_id                   = "subnet-1441f34d"
-  vpc_security_group_ids      = ["sg-09d16d6d"]
-
-  tags = {
-    Name = "jeff-${var.iam[count.index].name}"
-  }
+  names             = var.iam[*].name
+  instance_profiles = aws_iam_instance_profile.vault[*].name
 }

@@ -39,6 +39,7 @@ resource "vault_identity_entity_alias" "iam" {
 
 resource "vault_auth_backend" "iam" {
   type      = "aws"
+  path      = var.environment
   namespace = var.team_path
 }
 

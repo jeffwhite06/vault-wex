@@ -75,12 +75,30 @@ resource "vault_policy" "iam" {
   policy    = local.iam[count.index].policy
 }
 
-module "environments" {
+module "prod" {
   source = "./modules/environment"
 
-  count = length(var.environments)
+  providers = {
+    aws     = aws
+    aws.dev = aws.dev
+  }
 
-  environment = var.environments[count.index].name
+  environment = var.environments[0].name
+  team_path   = vault_namespace.team.path_fq
+  iam         = local.iam
+  kv_mount    = vault_mount.team_kv.path
+  policies    = vault_policy.iam[*].name
+}
+
+module "dev" {
+  source = "./modules/environment"
+
+  providers = {
+    aws     = aws.dev
+    aws.dev = aws.dev
+  }
+
+  environment = var.environments[1].name
   team_path   = vault_namespace.team.path_fq
   iam         = local.iam
   kv_mount    = vault_mount.team_kv.path
