@@ -26,7 +26,7 @@ path "secret/*" {
 }
 
 # Read KV secrets for environment
-path "secret/+/${environment}/*" {
+path "secret/+/{{identity.entity.metadata.environment}}/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
