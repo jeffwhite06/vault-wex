@@ -26,8 +26,8 @@ path "secret/*" {
 }
 
 # Read KV secrets for environment
-path "secret/prod/*" {
-  capabilities = ["read"]
+path "secret/+/${environment}/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
 # Manage secret engines

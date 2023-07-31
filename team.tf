@@ -6,7 +6,9 @@ locals {
   },{
     name   = "runner"
     role   = "vault-github-runner-role", 
-    policy = file("./vault-policies/team/runner.hcl")
+    policy = templatefile("./vault-policies/team/runner.hcl", {
+      environment = var.environment
+    })
   }]
 }
 

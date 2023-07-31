@@ -6,7 +6,7 @@ path "secret/*" {
 }
 
 # Manage prod - but deny read
-path "secret/prod/*" {
+path "secret/+/prod/*" {
   capabilities = ["create", "update", "patch", "delete", "list"]
 }
 
