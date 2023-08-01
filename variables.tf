@@ -3,11 +3,6 @@ variable "fabric" {
   default = "fabric"
 }
 
-variable "fabric_id" {
-  type    = string
-  default = "123456"
-}
-
 variable "team" {
   type    = string
   default = "engineering"

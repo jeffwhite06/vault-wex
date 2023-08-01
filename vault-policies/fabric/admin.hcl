@@ -41,8 +41,8 @@ path "sys/policies/acl/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
-# Manage KV secrets engine
-path "secret/*" {
+# Manage fabric KV secrets engines
+path "${secret}/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 

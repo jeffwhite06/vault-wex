@@ -3,7 +3,7 @@ resource "vault_namespace" "fabric" {
 }
 
 resource "vault_mount" "fabric_kv" {
-  path      = "secret"
+  path      = "${var.fabric}/${local.kv_store}"
   namespace = vault_namespace.fabric.path_fq
   type      = "kv"
   options = {
@@ -30,28 +30,27 @@ resource "vault_kv_secret_v2" "fabric" {
 module "fabric_admins" {
   source = "./modules/fabric"
 
-  fabric      = var.fabric
+  group       = "fabric-admins"
   fabric_path = vault_namespace.fabric.path_fq
-  team        = var.admin_team
   team_id     = module.admin_admins.admin_group_id
-  policy      = file("./vault-policies/fabric/admin.hcl")
+  policy      = templatefile("./vault-policies/fabric/admin.hcl", {
+    secret = var.fabric
+  })
 }
 
 module "fabric_engineering" {
   source = "./modules/fabric"
 
-  fabric      = var.fabric
+  group       = var.team
   fabric_path = vault_namespace.fabric.path_fq
-  team        = var.team
   team_id     = module.admin_engineering.admin_group_id
 }
 
 module "fabric_security" {
   source = "./modules/fabric"
 
-  fabric      = var.fabric
+  group       = "fabric-security"
   fabric_path = vault_namespace.fabric.path_fq
-  team        = var.security_team
   team_id     = module.admin_security.admin_group_id
   policy      = file("./vault-policies/fabric/security.hcl")
 }

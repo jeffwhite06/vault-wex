@@ -1,12 +1,8 @@
-variable "fabric" {
+variable "group" {
   type = string
 }
 
 variable "fabric_path" {
-  type = string
-}
-
-variable "team" {
   type = string
 }
 

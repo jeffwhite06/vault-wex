@@ -1,7 +1,16 @@
-resource "vault_kv_secret_v2" "example" {
-  mount     = var.kv_mount
+resource "vault_mount" "kv" {
+  path      = "${var.environment}/${var.kv_store}"
   namespace = var.team_path
-  name      = "${var.environment}/example"
+  type      = "kv"
+  options = {
+    version = "2"
+  }
+}
+
+resource "vault_kv_secret_v2" "example" {
+  mount     = vault_mount.kv.path
+  namespace = var.team_path
+  name      = "example"
 
   data_json = jsonencode({
     username = "username",
@@ -22,6 +31,7 @@ resource "vault_identity_entity" "iam" {
 
   name      = "${var.environment}-${var.iam[count.index].name}-iam-role"
   namespace = var.team_path
+  policies  = [var.policies[count.index]]
 
   metadata = {
     environment = var.environment
@@ -31,7 +41,7 @@ resource "vault_identity_entity" "iam" {
 resource "vault_identity_entity_alias" "iam" {
   count = length(var.iam)
 
-  name           = aws_iam_role.vault[count.index].unique_id
+  name           = module.environment_iam.role_ids[count.index]
   namespace      = var.team_path
   mount_accessor = vault_auth_backend.iam.accessor
   canonical_id   = vault_identity_entity.iam[count.index].id
@@ -39,15 +49,15 @@ resource "vault_identity_entity_alias" "iam" {
 
 resource "vault_auth_backend" "iam" {
   type      = "aws"
-  path      = var.environment
+  path      = "${var.environment}/aws"
   namespace = var.team_path
 }
 
 resource "vault_aws_auth_backend_client" "iam" {
   backend    = vault_auth_backend.iam.path
   namespace  = var.team_path
-  access_key = aws_iam_access_key.vault.id
-  secret_key = aws_iam_access_key.vault.secret
+  access_key = module.environment_iam.access_key
+  secret_key = module.environment_iam.secret_key
 }
 
 resource "vault_aws_auth_backend_role" "app" {
@@ -55,11 +65,11 @@ resource "vault_aws_auth_backend_role" "app" {
 
   backend                  = vault_auth_backend.iam.path
   namespace                = var.team_path
-  role                     = var.iam[count.index].role
+  role                     = module.environment_iam.role_names[count.index]
   auth_type                = "iam"
-  bound_iam_principal_arns = [aws_iam_role.vault[count.index].arn]
+  bound_iam_principal_arns = [module.environment_iam.roles[count.index]]
   resolve_aws_unique_ids   = true
-  token_policies           = [var.policies[count.index]]
+  token_policies           = ["default"]
 
   depends_on = [vault_aws_auth_backend_client.iam]
 }

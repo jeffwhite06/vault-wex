@@ -10,10 +10,10 @@ variable "iam" {
   type = list(map(string))
 }
 
-variable "kv_mount" {
-  type = string
-}
-
 variable "policies" {
   type = list(string)
+}
+
+variable "kv_store" {
+  type = string
 }

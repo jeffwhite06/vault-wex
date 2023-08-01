@@ -6,7 +6,7 @@ path "identity/*" {
 }
 
 # Manage auth methods broadly across Vault
-path "auth/*" {
+path "auth/{{identity.entity.metadata.environment}}/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
@@ -21,13 +21,18 @@ path "sys/auth" {
 }
 
 # Manage KV secrets engines
-path "secret/*" {
-  capabilities = ["create", "update", "delete", "list", "sudo"]
+path "{{identity.entity.metadata.environment}}/*" {
+  capabilities = ["create", "update", "delete", "list"]
 }
 
 # Read KV secrets for environment
-path "secret/+/{{identity.entity.metadata.environment}}/*" {
-  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+path "{{identity.entity.metadata.environment}}/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
+# Manage shared KV secrets
+path "${secret}/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
 }
 
 # Manage secret engines
