@@ -18,11 +18,17 @@ resource "vault_kv_secret_v2" "example" {
   })
 }
 
+resource "vault_policy" "env" {
+  name      = var.environment
+  namespace = var.team_path
+  policy    = contains(["prod","stage"], var.environment) ? templatefile("${path.root}/vault-policies/env/prod.hcl", {environment = var.environment}) : templatefile("${path.root}/vault-policies/env/nonprod.hcl", {environment = var.environment})
+}
+
 resource "vault_identity_group" "env" {
   name             = var.environment
   namespace        = var.team_path
   type             = "internal"
-  policies         = contains(["prod","stage"], var.environment) ? [templatefile("${path.root}/vault-policies/env/prod.hcl", {environment = var.environment})] : [templatefile("${path.root}/vault-policies/env/prod.hcl", {environment = var.environment})]
+  policies         = [vault_policy.env.name]
   member_group_ids = var.group_ids
 }
 
