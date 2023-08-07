@@ -90,6 +90,7 @@ module "prod" {
   iam         = local.iam
   policies    = vault_policy.iam[*].name
   kv_store    = local.kv_store
+  group_ids   = [module.admin_engineering.admin_group_id, module.admin_admins.admin_group_id]
 }
 
 module "dev" {
@@ -104,4 +105,5 @@ module "dev" {
   iam         = local.iam
   policies    = vault_policy.iam[*].name
   kv_store    = local.kv_store
+  group_ids   = [module.admin_engineering.admin_group_id, module.admin_admins.admin_group_id]
 }

@@ -36,12 +36,6 @@ path "sys/policies/acl/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
-# TODO: Need to figure out how to give access to all environments and secrets
-# Manage KV secrets engine
-path "+/${store}/*" {
-  capabilities = ["create", "update", "delete", "list", "sudo"]
-}
-
 # Manage secret engines
 path "sys/mounts/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]

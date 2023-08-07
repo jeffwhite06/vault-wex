@@ -18,13 +18,20 @@ resource "vault_kv_secret_v2" "example" {
   })
 }
 
-# namespace is broken on this resource - need to provision manually
-# resource "vault_aws_auth_backend_config_identity" "iam" {
-#   backend      = vault_auth_backend.iam.path
-#   namespace    = var.team_path
-#   iam_alias    = "unique_id"
-#   iam_metadata = ["account_id", "auth_type", "canonical_arn", "client_arn", "client_user_id", "inferred_aws_region", "inferred_entity_id", "inferred_entity_type"]
-# }
+resource "vault_identity_group" "env" {
+  name             = var.environment
+  namespace        = var.team_path
+  type             = "internal"
+  policies         = contains(["prod","stage"], var.environment) ? [templatefile("${path.root}/vault-policies/env/prod.hcl", {environment = var.environment})] : [templatefile("${path.root}/vault-policies/env/prod.hcl", {environment = var.environment})]
+  member_group_ids = var.group_ids
+}
+
+resource "vault_aws_auth_backend_config_identity" "iam" {
+  backend      = vault_auth_backend.iam.path
+  namespace    = var.team_path
+  iam_alias    = "unique_id"
+  iam_metadata = ["account_id", "auth_type", "canonical_arn", "client_arn", "client_user_id", "inferred_aws_region", "inferred_entity_id", "inferred_entity_type"]
+}
 
 resource "vault_identity_entity" "iam" {
   count = length(var.iam)

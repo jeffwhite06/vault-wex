@@ -1,19 +1,3 @@
-data "aws_ami" "linux" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-ecs-hvm*"]
-  }
-
-  filter {
-    name = "architecture"
-    values = ["x86_64"]
-  }
-  
-  owners = ["amazon"]
-}
-
 data "aws_vpc" "this" {
   tags = {
     Name = "Dev VPC"
@@ -41,7 +25,7 @@ data "aws_security_group" "this" {
 resource "aws_instance" "example" {
   count = length(var.names)
 
-  ami                         = data.aws_ami.linux.id
+  ami                         = "ami-03c78641af2c4ba60"
   instance_type               = "t2.micro"
   iam_instance_profile        = var.instance_profiles[count.index]
   key_name                    = "Dev-Bastion"

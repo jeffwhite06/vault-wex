@@ -17,3 +17,7 @@ variable "policies" {
 variable "kv_store" {
   type = string
 }
+
+variable "group_ids" {
+  type = list(string)
+}
